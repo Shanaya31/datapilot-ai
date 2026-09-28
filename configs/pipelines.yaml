@@ -1,0 +1,34 @@
+# One entry per Airflow DAG. Add payments / analytics pipelines here later.
+pipelines:
+  orders_pipeline:
+    dag_id: orders_pipeline
+    entity: orders
+    schedule: "@daily"
+    retries: 1
+  inventory_pipeline:
+    dag_id: inventory_pipeline
+    entity: inventory
+    schedule: "@daily"
+    retries: 1
+  customer_pipeline:
+    dag_id: customer_pipeline
+    entity: customers
+    schedule: "@daily"
+    retries: 1
+
+task_order:
+  - extract
+  - validate_schema
+  - validate_quality
+  - transform
+  - load_analytics
+  - update_metrics
+
+# Expected source schema (header of the daily CSV) and BigQuery raw column types.
+schemas:
+  orders:
+    columns: [order_id, customer_id, product_id, order_ts, quantity, amount, status]
+  inventory:
+    columns: [product_id, warehouse_id, stock_level, reorder_level, snapshot_ts]
+  customers:
+    columns: [customer_id, name, email, country, signup_ts, segment]

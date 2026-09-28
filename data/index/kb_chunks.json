@@ -1,0 +1,80 @@
+[
+  {
+    "source": "data_quality_rules.md",
+    "doc_title": "Data Quality Rules (summary)",
+    "heading": "Thresholds",
+    "text": "Thresholds enforced by `validate_quality` live in `configs/quality_rules.yaml`, one section\nper entity (`orders`, `inventory`, `customers`). Each entity defines: a business key for\nduplicate detection, a timestamp column for freshness, row-count tolerance vs. the trailing\n7-run median, per-column NULL rate limits, a max duplicate rate, and a `valid_values` map for\ndomain checks (e.g. `orders.status` must be one of PLACED/SHIPPED/DELIVERED/CANCELLED/RETURNED)."
+  },
+  {
+    "source": "data_quality_rules.md",
+    "doc_title": "Data Quality Rules (summary)",
+    "heading": "Severity",
+    "text": "All checks in the current ruleset are `severity: error`, meaning any failure blocks the\n`validate_quality` task and stops the DAG before `transform` runs \u00e2\u20ac\u201d DataPilot never loads\nknown-bad data into `staging`/`analytics`."
+  },
+  {
+    "source": "pipeline_runbook.md",
+    "doc_title": "Pipeline Operations Runbook",
+    "heading": "On-call triage order",
+    "text": "When a DataPilot pipeline fails, investigate in this order: (1) which task failed and its\nexact error message (`get_task_logs`), (2) whether this is a new failure or a recurring one\n(`get_recent_runs`), (3) what the data-quality checks actually measured for this batch\n(`check_*` tools). Do not re-run a failed DAG until the root cause is understood \u00e2\u20ac\u201d\n`validate_schema` and `validate_quality` failures are not retryable and re-running without a\nfix will fail again in the same way."
+  },
+  {
+    "source": "pipeline_runbook.md",
+    "doc_title": "Pipeline Operations Runbook",
+    "heading": "Escalation",
+    "text": "Escalate to the upstream source-system owner (not the data platform team) for: schema\nchanges, stale/missing exports, and invalid values that look like a producer bug. Keep the\nincident with the data platform team for: BigQuery quota/permission errors, Airflow\ninfrastructure failures, and DataPilot bugs in `sql/transform` or `sql/analytics`."
+  },
+  {
+    "source": "pipeline_runbook.md",
+    "doc_title": "Pipeline Operations Runbook",
+    "heading": "Re-run policy",
+    "text": "Pipelines are idempotent per `batch_date` (`extract` deletes-then-loads the batch, `transform`\nand `load_analytics` do the same). It is always safe to re-run a pipeline for a past\n`batch_date` once the underlying issue is fixed."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "NULL spike in a required column",
+    "text": "If `check_nulls` fails, the most common cause is an upstream export that dropped a join\nkey (commonly `customer_id` on the orders export). Check the upstream export logs for the\nsame batch date before re-running. Do not backfill NULLs with a placeholder value \u00e2\u20ac\u201d that\nsilently corrupts downstream joins in `analytics.orders_daily`."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Duplicate spike on the business key",
+    "text": "`check_duplicates` compares row count to distinct business-key count. A sudden jump usually\nmeans the upstream export was re-run and appended instead of overwritten, or an at-least-once\ndelivery retried a batch. `transform/*.sql` already de-duplicates staging with\n`QUALIFY ROW_NUMBER() ... = 1`, so a duplicate spike in raw is a data-freshness / upstream\nsignal, not a pipeline bug \u00e2\u20ac\u201d flag it to the source-system owner rather than patching staging."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Schema drift / schema_change failures",
+    "text": "`validate_schema` compares the source CSV header to `configs/pipelines.yaml -> schemas`.\nA renamed or added column usually means the upstream team shipped a breaking change without\nnotice. `extract()` is tolerant (missing columns become NULL, extra columns are dropped), but\n`validate_schema` still fails the run on purpose so a human confirms the new shape is\nintentional before `configs/pipelines.yaml` is updated to match."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Low volume / row-count anomaly",
+    "text": "`check_row_count` compares today's rows to the trailing median of the last 7 successful runs\n(`quality.anomaly.volume_anomaly`). A drop >50% (orders) usually means the upstream source\nfile is partial \u00e2\u20ac\u201d check the file's timestamp and size against a normal day before assuming\nreal-world demand dropped. Do not silently accept a partial file; investigate upstream first."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Stale data / freshness failures",
+    "text": "`check_freshness` looks at the max timestamp in the batch. Stale data almost always means an\nupstream job did not run for the batch date (a stuck cron, a paused connector) rather than a\nDataPilot bug \u00e2\u20ac\u201d check the upstream system's own run history for the same date."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Invalid values (negative amounts, out-of-domain status codes)",
+    "text": "`check_invalid_values` enforces the `valid_values` rules in\n`configs/quality_rules.yaml` (allowed status codes, minimum amount/stock_level). These almost\nalways indicate a bug in the upstream producer (e.g. a refund posted as a negative order\namount) rather than a transient blip, and should be reported to that team, not silently\nfiltered out downstream."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Pipeline timeout during extract",
+    "text": "A `TimeoutError` in the `extract` task means the upstream export API did not respond within\nthe configured window. Retry once (the DAG already retries automatically); if it times out\ntwice in a row, the upstream export job itself is probably stuck \u00e2\u20ac\u201d escalate rather than keep\nretrying, since retries do not fix a stuck upstream job."
+  },
+  {
+    "source": "troubleshooting_guide.md",
+    "doc_title": "Data Pipeline Troubleshooting Guide",
+    "heading": "Upstream API failure (5xx / connection errors)",
+    "text": "A `ConnectionError` in `extract` means the upstream export API returned an error (e.g. HTTP\n503) after its own retries were exhausted. This is an upstream availability issue, not a data\nquality issue \u00e2\u20ac\u201d check the upstream service's status page before re-running the DAG."
+  }
+]

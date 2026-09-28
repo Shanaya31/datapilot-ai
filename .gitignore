@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+airflow/airflow.db
+airflow/logs/
+airflow/airflow.cfg
+airflow/webserver_config.py
+data/seed/output/
+*.egg-info/
+.DS_Store
+chroma_db/
+
+data/raw/

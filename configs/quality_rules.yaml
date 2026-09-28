@@ -1,0 +1,50 @@
+# Thresholds enforced by Airflow (validate_quality) AND used by the Data Quality Agent tools.
+# Rates are fractions (0.02 == 2%).
+orders:
+  key: [order_id]
+  timestamp_column: order_ts
+  max_freshness_lag_hours: 30
+  volume:
+    tolerance_pct: 50          # flag if today deviates >50% from trailing median
+    min_rows: 1000             # fallback when there is no run history
+    max_rows: 100000
+  null_thresholds:
+    order_id: 0.0
+    customer_id: 0.02
+    order_ts: 0.0
+    amount: 0.0
+  max_duplicate_rate: 0.01
+  valid_values:
+    status: {allowed: [PLACED, SHIPPED, DELIVERED, CANCELLED, RETURNED], max_invalid_rate: 0.0}
+    amount: {min: 0, max_invalid_rate: 0.0}
+    quantity: {min: 1, max_invalid_rate: 0.0}
+
+inventory:
+  key: [product_id, warehouse_id]
+  timestamp_column: snapshot_ts
+  max_freshness_lag_hours: 30
+  volume:
+    tolerance_pct: 30
+    min_rows: 100
+    max_rows: 20000
+  null_thresholds:
+    product_id: 0.0
+    warehouse_id: 0.0
+    stock_level: 0.01
+  max_duplicate_rate: 0.0
+  valid_values:
+    stock_level: {min: 0, max_invalid_rate: 0.0}
+
+customers:
+  key: [customer_id]
+  timestamp_column: signup_ts
+  max_freshness_lag_hours: 8760   # signup_ts is historical; effectively disabled
+  volume:
+    tolerance_pct: 30
+    min_rows: 30
+    max_rows: 1000000
+  null_thresholds:
+    customer_id: 0.0
+    email: 0.05
+  max_duplicate_rate: 0.0
+  valid_values: {}

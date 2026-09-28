@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>DataPilot AI</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1 { margin-bottom: 0.2rem; }
+  .sub { color: #666; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+  .status-success { color: #1a7f37; font-weight: 600; }
+  .status-failed { color: #cf222e; font-weight: 600; }
+  button { cursor: pointer; padding: 0.3rem 0.7rem; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
+  #incident { white-space: pre-wrap; background: #f6f8fa; padding: 1rem; border-radius: 6px; font-size: 0.85rem; }
+  #timeline li { margin-bottom: 0.3rem; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <h1>DataPilot AI</h1>
+  <p class="sub">Pipeline health, incidents, and AI investigations.</p>
+
+  <h2>Pipeline Health</h2>
+  <table id="health"><thead><tr><th>Pipeline</th><th>Status</th><th>Batch</th><th>Records</th><th></th></tr></thead>
+    <tbody></tbody></table>
+
+  <h2>Investigation</h2>
+  <div id="incident">Select a failed run above to investigate.</div>
+  <h3>Timeline</h3>
+  <ul id="timeline"></ul>
+
+<script>
+async function loadHealth() {
+  const res = await fetch('/pipelines');
+  const rows = await res.json();
+  const body = document.querySelector('#health tbody');
+  body.innerHTML = '';
+  for (const row of rows) {
+    const run = row.latest_run;
+    const tr = document.createElement('tr');
+    if (!run) {
+      tr.innerHTML = `<td>${row.pipeline_name}</td><td colspan="4">No runs yet</td>`;
+    } else {
+      const cls = run.status === 'success' ? 'status-success' : 'status-failed';
+      const btn = run.status === 'failed'
+        ? `<button onclick="investigate('${run.run_id}','${row.pipeline_name}','${run.batch_date}')">Investigate</button>`
+        : '';
+      tr.innerHTML = `<td>${row.pipeline_name}</td><td class="${cls}">${run.status.toUpperCase()}</td>` +
+        `<td>${run.batch_date}</td><td>${run.records_processed ?? '-'}</td><td>${btn}</td>`;
+    }
+    body.appendChild(tr);
+  }
+}
+
+async function investigate(runId, pipelineName, batchDate) {
+  document.getElementById('incident').textContent = 'Investigating... (agents are calling their tools)';
+  const res = await fetch('/investigate', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({run_id: runId, pipeline_name: pipelineName, batch_date: batchDate}),
+  });
+  const data = await res.json();
+  document.getElementById('incident').textContent = JSON.stringify(data.diagnosis, null, 2);
+
+  const inc = await fetch(`/incidents/${runId}`);
+  if (inc.ok) {
+    const incData = await inc.json();
+    const tl = document.getElementById('timeline');
+    tl.innerHTML = '';
+    for (const ev of incData.timeline) {
+      const li = document.createElement('li');
+      li.textContent = `${ev.time ?? '?'} — ${ev.text}`;
+      tl.appendChild(li);
+    }
+  }
+}
+
+loadHealth();
+</script>
+</body>
+</html>

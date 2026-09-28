@@ -1,0 +1,21 @@
+# --- Core app / agents ---
+google-cloud-bigquery>=3.25.0
+google-adk>=0.1.0
+google-genai>=0.8.0
+pydantic>=2.9.0
+pyyaml>=6.0.2
+pandas>=2.2.0
+numpy>=1.26.0
+
+# --- API (Day 9) ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# --- Orchestration (Day 3) ---
+apache-airflow>=2.10.0,<3.0.0
+
+# --- Data generation (Day 1) ---
+faker>=29.0.0
+
+# --- Tests / eval ---
+pytest>=8.3.0
