@@ -85,6 +85,7 @@ async def run_investigation(req: InvestigateRequest) -> dict:
             run_id=req.run_id, pipeline_name=req.pipeline_name, diagnosis=result["diagnosis"],
             tool_trace=result["tool_trace"], latency_seconds=result["latency_seconds"], model=result["model"],
         )
+        run_logger.attach_audit_incident(req.run_id, incident_id)
         result["incident_id"] = incident_id
     return result
 

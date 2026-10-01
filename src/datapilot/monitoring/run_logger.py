@@ -39,6 +39,22 @@ def log_dq_results(run_id: str, pipeline_name: str, results: list[CheckResult]) 
     } for r in results])
 
 
+def log_agent_action(*, incident_id: str | None, run_id: str, pipeline_name: str,
+                     agent_name: str, action_type: str, tool_name: str,
+                     tool_args: dict | None = None, tool_response: object | None = None) -> None:
+    bq.append_rows("monitoring", "audit_log", [{
+        "incident_id": incident_id,
+        "run_id": run_id,
+        "pipeline_name": pipeline_name,
+        "agent_name": agent_name,
+        "action_type": action_type,
+        "tool_name": tool_name,
+        "tool_args_json": json.dumps(tool_args or {}, default=str),
+        "tool_response_json": json.dumps(tool_response, default=str) if tool_response is not None else None,
+        "created_at": _now(),
+    }])
+
+
 def log_pipeline_run(*, run_id: str, pipeline_name: str, batch_date: str, start_time, end_time, status: str,
                      records_processed: int | None = None, records_failed: int | None = None,
                      failed_task: str | None = None, error_message: str | None = None) -> None:
@@ -69,3 +85,17 @@ def save_incident(run_id: str, pipeline_name: str, diagnosis: dict, tool_trace: 
         "latency_seconds": latency_seconds, "model": model,
     }])
     return incident_id
+
+def attach_audit_incident(run_id: str, incident_id: str) -> None:
+    query = (
+        f"UPDATE {bq.fq('monitoring', 'audit_log')} "
+        "SET incident_id = @incident_id "
+        "WHERE run_id = @run_id AND incident_id IS NULL"
+    )
+    bq.run_query(
+        query,
+        {
+            "incident_id": incident_id,
+            "run_id": run_id,
+        },
+    )

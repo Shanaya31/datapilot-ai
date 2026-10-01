@@ -14,6 +14,31 @@
   button { cursor: pointer; padding: 0.3rem 0.7rem; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
   #incident { white-space: pre-wrap; background: #f6f8fa; padding: 1rem; border-radius: 6px; font-size: 0.85rem; }
   #timeline li { margin-bottom: 0.3rem; font-size: 0.85rem; }
+  #observability {
+    background: #f6f8fa;
+    padding: 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  .trace-event {
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #999;
+    background: #fff;
+  }
+  .trace-agent {
+    font-weight: 600;
+  }
+  .trace-type {
+    color: #666;
+    font-size: 0.8rem;
+  }
+  .trace-data {
+    margin-top: 0.35rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }  
+
 </style>
 </head>
 <body>
@@ -29,6 +54,8 @@
   <h3>Timeline</h3>
   <ul id="timeline"></ul>
 
+  <h3>Agent Observability</h3>
+  <div id="observability">Run an investigation to see agent tool activity.</div>
 <script>
 async function loadHealth() {
   const res = await fetch('/pipelines');
@@ -54,12 +81,38 @@ async function loadHealth() {
 
 async function investigate(runId, pipelineName, batchDate) {
   document.getElementById('incident').textContent = 'Investigating... (agents are calling their tools)';
+
   const res = await fetch('/investigate', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({run_id: runId, pipeline_name: pipelineName, batch_date: batchDate}),
   });
   const data = await res.json();
   document.getElementById('incident').textContent = JSON.stringify(data.diagnosis, null, 2);
+  const observability = document.getElementById('observability');
+  observability.innerHTML = '';
+
+  for (const event of (data.tool_trace || [])) {
+    const div = document.createElement('div');
+    div.className = 'trace-event';
+
+    const agent = event.agent ?? 'unknown agent';
+    const type = event.type ?? 'unknown';
+
+    let details = '';
+
+    if (type === 'call') {
+      details = JSON.stringify(event.args ?? {}, null, 2);
+    } else if (type === 'response') {
+      details = JSON.stringify(event.response ?? {}, null, 2);
+    }
+
+    div.innerHTML =
+      `<div class="trace-agent">${agent}</div>` +
+      `<div class="trace-type">${type} · ${event.tool ?? ''}</div>` +
+      `<div class="trace-data">${details}</div>`;
+
+    observability.appendChild(div);
+  }
 
   const inc = await fetch(`/incidents/${runId}`);
   if (inc.ok) {

@@ -1,0 +1,298 @@
+{
+  "summary": {
+    "runs": 8,
+    "diagnosis_accuracy": 1.0,
+    "evidence_grounding_rate": 1.0,
+    "tool_use_correctness_rate": 0.75,
+    "avg_latency_seconds": 159.05,
+    "pipeline_failed_as_expected_rate": 1.0
+  },
+  "runs": [
+    {
+      "batch_date": "2026-09-23",
+      "pipeline": "orders_pipeline",
+      "run_id": "local__f639d370bf",
+      "expected": "null_spike",
+      "diagnosed": "null_spike",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 191.01,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-09-25",
+      "pipeline": "customer_pipeline",
+      "run_id": "local__3e68467de3",
+      "expected": "duplicate_spike",
+      "diagnosed": "duplicate_spike",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 174.4,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ],
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-09-27",
+      "pipeline": "orders_pipeline",
+      "run_id": "local__715e33033e",
+      "expected": "schema_change",
+      "diagnosed": "schema_change",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 129.51,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": false,
+        "missing_tools": {
+          "pipeline_agent": [
+            "get_task_logs"
+          ]
+        },
+        "forbidden_tools": [],
+        "observed_tools": {
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-09-29",
+      "pipeline": "inventory_pipeline",
+      "run_id": "local__f236015477",
+      "expected": "low_volume",
+      "diagnosed": "low_volume",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 138.47,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-10-01",
+      "pipeline": "orders_pipeline",
+      "run_id": "local__504ed7d30f",
+      "expected": "stale_data",
+      "diagnosed": "stale_data",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 188.17,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-10-02",
+      "pipeline": "orders_pipeline",
+      "run_id": "local__ce4ea96a39",
+      "expected": "invalid_values",
+      "diagnosed": "invalid_values",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 179.41,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-10-03",
+      "pipeline": "inventory_pipeline",
+      "run_id": "local__fdc2890049",
+      "expected": "pipeline_timeout",
+      "diagnosed": "pipeline_timeout",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 134.71,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": true,
+        "missing_tools": {},
+        "forbidden_tools": [],
+        "observed_tools": {
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs",
+            "get_task_logs"
+          ],
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ]
+        }
+      }
+    },
+    {
+      "batch_date": "2026-10-04",
+      "pipeline": "customer_pipeline",
+      "run_id": "local__46fc0a77b6",
+      "expected": "api_failure",
+      "diagnosed": "api_failure",
+      "correct": true,
+      "grounded": true,
+      "confidence": 1.0,
+      "latency_seconds": 136.69,
+      "pipeline_failed": true,
+      "tool_use": {
+        "correct": false,
+        "missing_tools": {
+          "pipeline_agent": [
+            "get_task_logs"
+          ]
+        },
+        "forbidden_tools": [],
+        "observed_tools": {
+          "pipeline_agent": [
+            "get_pipeline_status",
+            "get_recent_runs"
+          ],
+          "knowledge_agent": [
+            "search_knowledge_base"
+          ],
+          "quality_agent": [
+            "check_duplicates",
+            "check_freshness",
+            "check_invalid_values",
+            "check_nulls",
+            "check_row_count",
+            "check_schema"
+          ]
+        }
+      }
+    }
+  ]
+}
